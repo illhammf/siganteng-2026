@@ -57,6 +57,8 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Transaksi Barbershop'),
                 NavigationGroup::make()
+                    ->label('Interaksi Website'),
+                NavigationGroup::make()
                     ->label('Administration'),
             ])
             ->userMenuItems([
