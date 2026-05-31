@@ -53,6 +53,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make()
+                    ->label('Manajemen Barbershop'),
+                NavigationGroup::make()
+                    ->label('Transaksi Barbershop'),
+                NavigationGroup::make()
                     ->label('Administration'),
             ])
             ->userMenuItems([

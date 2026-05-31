@@ -3,37 +3,66 @@
 namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\LayananResource\Pages;
-use App\Filament\Admin\Resources\LayananResource\RelationManagers;
 use App\Models\Layanan;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class LayananResource extends Resource
 {
     protected static ?string $model = Layanan::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-s-sparkles';
+
+    protected static ?string $navigationGroup = 'Manajemen Barbershop';
+
+    protected static ?string $navigationLabel = 'Data Layanan';
+
+    protected static ?string $modelLabel = 'Layanan';
+
+    protected static ?string $pluralModelLabel = 'Data Layanan';
+
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('nama_layanan')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Textarea::make('deskripsi')
-                    ->columnSpanFull(),
-                Forms\Components\TextInput::make('durasi_menit')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('harga')
-                    ->required()
-                    ->numeric(),
+                Forms\Components\Section::make('Informasi Layanan')
+                    ->description('Masukkan jenis layanan yang tersedia di barbershop Si Ganteng.')
+                    ->icon('heroicon-o-sparkles')
+                    ->schema([
+                        Forms\Components\TextInput::make('nama_layanan')
+                            ->label('Nama Layanan')
+                            ->placeholder('Contoh: Potong Rambut')
+                            ->required()
+                            ->maxLength(255),
+
+                        Forms\Components\TextInput::make('durasi_menit')
+                            ->label('Durasi Layanan')
+                            ->placeholder('Contoh: 30')
+                            ->suffix('menit')
+                            ->required()
+                            ->numeric()
+                            ->minValue(1),
+
+                        Forms\Components\TextInput::make('harga')
+                            ->label('Harga Layanan')
+                            ->placeholder('Contoh: 35000')
+                            ->prefix('Rp')
+                            ->required()
+                            ->numeric()
+                            ->minValue(0),
+
+                        Forms\Components\Textarea::make('deskripsi')
+                            ->label('Deskripsi')
+                            ->placeholder('Masukkan deskripsi singkat layanan')
+                            ->rows(3)
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(2),
             ]);
     }
 
@@ -42,31 +71,58 @@ class LayananResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('nama_layanan')
-                    ->searchable(),
+                    ->label('Nama Layanan')
+                    ->searchable()
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('durasi_menit')
-                    ->numeric()
+                    ->label('Durasi')
+                    ->suffix(' menit')
                     ->sortable(),
+
                 Tables\Columns\TextColumn::make('harga')
-                    ->numeric()
+                    ->label('Harga')
+                    ->money('IDR')
                     ->sortable(),
+
+                Tables\Columns\TextColumn::make('reservasis_count')
+                    ->label('Total Reservasi')
+                    ->counts('reservasis')
+                    ->badge()
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('deskripsi')
+                    ->label('Deskripsi')
+                    ->limit(40)
+                    ->toggleable(),
+
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Dibuat')
+                    ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->label('Diubah')
+                    ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('nama_layanan', 'asc')
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->label('Edit'),
+
+                Tables\Actions\DeleteAction::make()
+                    ->label('Hapus'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->label('Hapus Terpilih'),
                 ]),
             ]);
     }

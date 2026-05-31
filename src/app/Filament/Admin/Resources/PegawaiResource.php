@@ -3,39 +3,72 @@
 namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\PegawaiResource\Pages;
-use App\Filament\Admin\Resources\PegawaiResource\RelationManagers;
 use App\Models\Pegawai;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PegawaiResource extends Resource
 {
     protected static ?string $model = Pegawai::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-s-scissors';
+
+    protected static ?string $navigationGroup = 'Manajemen Barbershop';
+
+    protected static ?string $navigationLabel = 'Data Pegawai';
+
+    protected static ?string $modelLabel = 'Pegawai';
+
+    protected static ?string $pluralModelLabel = 'Data Pegawai';
+
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('nama')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('spesialisasi')
-                    ->maxLength(255)
-                    ->default(null),
-                Forms\Components\TextInput::make('nomor_telepon')
-                    ->tel()
-                    ->maxLength(255)
-                    ->default(null),
-                Forms\Components\TextInput::make('gaji')
-                    ->numeric()
-                    ->default(null),
+                Forms\Components\Section::make('Informasi Pegawai')
+                    ->description('Masukkan data pegawai atau barber yang melayani pelanggan.')
+                    ->icon('heroicon-o-user-circle')
+                    ->schema([
+                        Forms\Components\TextInput::make('nama')
+                            ->label('Nama Pegawai')
+                            ->placeholder('Contoh: Rizky Barber')
+                            ->required()
+                            ->maxLength(255),
+
+                        Forms\Components\Select::make('spesialisasi')
+                            ->label('Spesialisasi')
+                            ->placeholder('Pilih spesialisasi pegawai')
+                            ->options([
+                                'Fade Cut' => 'Fade Cut',
+                                'Pompadour' => 'Pompadour',
+                                'Hair Coloring' => 'Hair Coloring',
+                                'Beard Styling' => 'Beard Styling',
+                                'Hair Spa' => 'Hair Spa',
+                                'General Barber' => 'General Barber',
+                            ])
+                            ->searchable()
+                            ->nullable(),
+
+                        Forms\Components\TextInput::make('nomor_telepon')
+                            ->label('Nomor Telepon')
+                            ->placeholder('Contoh: 081234567890')
+                            ->tel()
+                            ->maxLength(20)
+                            ->nullable(),
+
+                        Forms\Components\TextInput::make('gaji')
+                            ->label('Gaji')
+                            ->placeholder('Contoh: 5000000')
+                            ->numeric()
+                            ->prefix('Rp')
+                            ->nullable(),
+                    ])
+                    ->columns(2),
             ]);
     }
 
@@ -44,32 +77,67 @@ class PegawaiResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('nama')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('spesialisasi')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('nomor_telepon')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('gaji')
-                    ->numeric()
+                    ->label('Nama Pegawai')
+                    ->searchable()
                     ->sortable(),
+
+                Tables\Columns\TextColumn::make('spesialisasi')
+                    ->label('Spesialisasi')
+                    ->badge()
+                    ->searchable()
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('nomor_telepon')
+                    ->label('Nomor Telepon')
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('gaji')
+                    ->label('Gaji')
+                    ->money('IDR')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('reservasis_count')
+                    ->label('Total Reservasi')
+                    ->counts('reservasis')
+                    ->badge()
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Dibuat')
+                    ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->label('Diubah')
+                    ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('nama', 'asc')
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('spesialisasi')
+                    ->label('Filter Spesialisasi')
+                    ->options([
+                        'Fade Cut' => 'Fade Cut',
+                        'Pompadour' => 'Pompadour',
+                        'Hair Coloring' => 'Hair Coloring',
+                        'Beard Styling' => 'Beard Styling',
+                        'Hair Spa' => 'Hair Spa',
+                        'General Barber' => 'General Barber',
+                    ]),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->label('Edit'),
+
+                Tables\Actions\DeleteAction::make()
+                    ->label('Hapus'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->label('Hapus Terpilih'),
                 ]),
             ]);
     }
