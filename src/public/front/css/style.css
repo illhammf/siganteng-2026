@@ -483,3 +483,23 @@ body {
     color: #dc2626;
     font-size: 13px;
 }
+
+.navbar.scrolled {
+    box-shadow: 0 14px 35px rgba(18, 53, 36, .12);
+}
+
+.reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: .7s ease;
+}
+
+.reveal.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+button.loading {
+    opacity: .75;
+    cursor: wait;
+}
